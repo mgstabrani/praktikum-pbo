@@ -1,52 +1,71 @@
+#include "ArtistUser.h"
 #include <iostream>
 #include <cstring>
-#include "ArtistUser.h"
 using namespace std;
 
 int ArtistUser::num_of_artist = 0;
 
-ArtistUser::ArtistUser(char* name) : User(name){
-    this->num_of_artist++;
-}
-        
-ArtistUser::ArtistUser(const ArtistUser& name) : User(name){
-    this->num_of_artist++;
+ArtistUser::ArtistUser(char *n) : User(n){
+    this->num_of_music_uploaded = 0;
+    this->uploaded_music_list = new char *[255];
+    num_of_artist++;
 }
 
-        // dtor
-        // selain implementasi, print juga "Artist user <nama user> deleted"
-        // Contoh:
-        // Artist user A deleted
+ArtistUser::ArtistUser(const ArtistUser &user) : User(user.getName()){
+    this->num_of_favourite_music = user.num_of_favourite_music;
+    this->music_list = new char *[255];
+
+    for (int i = 0; i < user.num_of_favourite_music; i++){
+        this->music_list[i] = new char[strlen(user.music_list[i])];
+        strcpy(this->music_list[i], user.music_list[i]);
+    }
+
+    this->num_of_music_uploaded = user.num_of_music_uploaded;
+    this->uploaded_music_list = new char *[255];
+
+    for (int i = 0; i < user.num_of_music_uploaded; i++){
+        this->uploaded_music_list[i] = new char[strlen(user.uploaded_music_list[i])];
+        strcpy(this->uploaded_music_list[i], user.uploaded_music_list[i]);
+    }
+
+    num_of_artist++;
+}
+
 ArtistUser::~ArtistUser(){
-    this->num_of_artist--;
     cout << "Artist user " << this->name << " deleted" << endl;
 }
-void ArtistUser::uploadMusic(char* judul){
+
+void ArtistUser::uploadMusic(char *musik){
     this->num_of_music_uploaded++;
-    strcpy(uploaded_music_list[this->num_of_music_uploaded-1],judul);
+    this->uploaded_music_list[this->num_of_music_uploaded - 1] = new char[strlen(musik)];
+    strcpy(this->uploaded_music_list[this->num_of_music_uploaded - 1], musik);
 }
 
-void ArtistUser::deleteUploadedMusic(char* judul){
-    char** tmp;
-    for(int i = 0; i < this->num_of_music_uploaded; i++){
-        if(strcmp(this->uploaded_music_list[i],judul)){
-            strcpy(tmp[i],uploaded_music_list[i]);
+void ArtistUser::deleteUploadedMusic(char *musik){
+    if (this->num_of_music_uploaded > 0){
+        int deleted = -1;
+        for (int i = 0; i < this->num_of_music_uploaded; i++){
+            if (strcmp(this->uploaded_music_list[i], musik) == 0){
+                deleted = i;
+                break;
+            }
         }
-    }
-    this->num_of_music_uploaded--;
-    delete[] this->uploaded_music_list;
-    this->uploaded_music_list = new char*;
-    for(int i = 0; i < this->getNumOfMusicUploaded();i++){
-        this->uploaded_music_list[i] = tmp[i];
+        if (deleted != -1 and deleted < this->num_of_music_uploaded){
+            this->num_of_music_uploaded--;
+            for (int j = deleted; j < this->num_of_music_uploaded; j++){
+                strcpy(this->uploaded_music_list[j], this->uploaded_music_list[j + 1]);
+            }
+        }
     }
 }
 
 void ArtistUser::viewUploadedMusicList() const{
-    if(this->getNumOfMusicUploaded() > 0){
-        for(int i = 0; i < getNumOfMusicUploaded(); i++){
-            cout << (i+1) << ". " << this->uploaded_music_list[i] << endl;
+    if (this->num_of_music_uploaded > 0){
+        for (int i = 0; i < this->num_of_music_uploaded; i++){
+            cout << (i + 1) << ". " << this->uploaded_music_list[i] << endl;
         }
-    }else{
+    }
+    else{
         cout << "No music uploaded" << endl;
     }
 }
@@ -56,5 +75,5 @@ int ArtistUser::getNumOfMusicUploaded() const{
 }
 
 int ArtistUser::getNumOfArtist(){
-    return num_of_artist;
+    return ArtistUser::num_of_artist;
 }
